@@ -1,4 +1,4 @@
-Used with snmpd pass to provide table data (using java)
+A simple java sample app used with snmpd pass to provide table data 
 ====================
 
 edit /etc/snmp/snmpd.conf (add the line below) 
