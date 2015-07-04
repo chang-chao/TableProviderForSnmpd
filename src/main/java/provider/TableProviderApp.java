@@ -1,5 +1,9 @@
 package provider;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.apache.commons.lang.StringUtils;
 
 public class TableProviderApp {
@@ -8,32 +12,54 @@ public class TableProviderApp {
 	private static String TALBE_OID = ".1.3.6.1.4.1.8888.255";
 	private static String ENTRY_OID = TALBE_OID + ".1";
 
-	public static void main(String[] args) {
-		// PROG -g OID
-		String command = args[0];
-		String oid = args[1];
+	public static void main(String[] args) throws IOException {
 
-		SnmpValForSnmpd val = null;
-		if (StringUtils.equals("-g", command)) {
-			// get
-			val = getVal(oid);
+		try (InputStreamReader converter = new InputStreamReader(System.in);
+				BufferedReader in = new BufferedReader(converter);) {
 
-		} else if (StringUtils.equals("-n", command)) {
-			// getnext
-			String nextOid = getNextOid(oid);
-			if (nextOid != null) {
-				val = getVal(nextOid);
+			for (String line = in.readLine(); line != null; line = in
+					.readLine()) {
+				if (StringUtils.equals(line, "PING")) {
+					System.out.println("PONG");
+					continue;
+				}
+
+				// the shutdown protocol
+				// http://www.net-snmp.org/wiki/index.php/Tut:Extending_snmpd_using_shell_scripts
+				if (StringUtils.isEmpty(line)) {
+					return;
+				}
+
+				// command
+				String command = line;
+				// read next line for oid
+				String oid = in.readLine();
+
+				SnmpValForSnmpd val = null;
+				if (StringUtils.equals(command, "get")) {
+					// get
+					val = getVal(oid);
+
+				} else if (StringUtils.equals(command, "getNext")) {
+					// getnext
+					String nextOid = getNextOid(oid);
+					if (nextOid != null) {
+						val = getVal(nextOid);
+					}
+				}
+
+				if (val != null) {
+					output(val);
+				} else {
+					// If the command cannot return an appropriate varbind,
+					// it should print print "NONE\n" to stdout (but continue
+					// running).
+					System.out.println("NONE");
+				}
+
 			}
-		}
 
-		if (val != null) {
-			output(val);
 		}
-
-		// If the command cannot return an appropriate varbind
-		// - e.g the specified OID did not correspond to a valid instance for a
-		// GET request, or there were no following instances for a GETNEXT
-		// - then it should exit without producing any output.
 
 	}
 
