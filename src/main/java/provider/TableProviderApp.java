@@ -40,7 +40,7 @@ public class TableProviderApp {
 					// get
 					val = getVal(oid);
 
-				} else if (StringUtils.equals(command, "getNext")) {
+				} else if (StringUtils.equals(command, "getnext")) {
 					// getnext
 					String nextOid = getNextOid(oid);
 					if (nextOid != null) {
